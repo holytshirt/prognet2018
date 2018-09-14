@@ -1,0 +1,59 @@
+rm ProgNet.Service.tar.gz
+rmdir src/ProgNet.Service/publish
+dotnet publish src/ProgNet.Service/ProgNet.Service.csproj -o ./publish
+tar -czvf ProgNet.Service.tar.gz -C src/ProgNet.Service/publish .
+
+# Upload zip file
+ssh toby@192.168.33.10 "mkdir -p prognet" && scp ProgNet.Service.tar.gz toby@192.168.33.10:prognet
+
+# On Server
+sudo mkdir -p /opt/prognet/service/1
+sudo tar -xf prognet/ProgNet.Service.tar.gz --directory /opt/prognet/service/1
+sudo mkdir -p /var/log/prognet/service
+
+# Create service user
+sudo useradd -s /sbin/nologin prognet-user
+
+# Give permissions to prognet-user
+sudo chown -R prognet-user:prognet-user /opt/prognet/service 
+sudo chmod 775 /opt/prognet/service/1
+
+sudo chown -R prognet-user:prognet-user /var/log/prognet/
+sudo chmod -R g+w /opt/prognet/service/1
+sudo chmod g+w /var/log/prognet/service
+
+# Setup systemd 
+cd /etc/systemd/system
+sudo touch prognet-service.service
+sudo vim prognet-service.service
+
+####
+[Unit]
+Description=ProgNet Service
+
+[Service]
+ExecStart=/bin/dotnet/dotnet ProgNet.Service.dll
+WorkingDirectory=/opt/prognet/service/1
+User=prognet-user
+Group=prognet-user
+Restart=always
+RestartSec=3
+SyslogIdentifier=prognet-service
+PrivateTmp=true
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
+
+[Install]
+WantedBy=multi-user.target
+###
+
+# Reload config
+sudo systemctl daemon-reload
+
+# Enable, Start and view status
+sudo systemctl enable prognet-service.service
+sudo systemctl start prognet-service.service
+sudo systemctl status prognet-service.service
+# View journal
+sudo journalctl --unit prognet-service --follow
+
