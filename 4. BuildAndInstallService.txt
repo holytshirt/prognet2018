@@ -34,6 +34,8 @@ Description=ProgNet Service
 
 [Service]
 ExecStart=/bin/dotnet/dotnet ProgNet.Service.dll
+# If you're using the Amazon EC2 instance the right line is:
+# ExecStart=/usr/share/dotnet/dotnet ProgNet.Service.dll
 WorkingDirectory=/opt/prognet/service/1
 User=prognet-user
 Group=prognet-user
