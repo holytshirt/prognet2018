@@ -1,3 +1,4 @@
+# locally
 rm ProgNet.Service.tar.gz
 rmdir src/ProgNet.Service/publish
 dotnet publish src/ProgNet.Service/ProgNet.Service.csproj -o ./publish
