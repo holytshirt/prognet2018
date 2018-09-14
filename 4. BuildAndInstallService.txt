@@ -28,7 +28,7 @@ cd /etc/systemd/system
 sudo touch prognet-service.service
 sudo vim prognet-service.service
 
-####
+#### copy to vim
 [Unit]
 Description=ProgNet Service
 
